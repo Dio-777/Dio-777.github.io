@@ -2,402 +2,297 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Para Ana</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>A = f(❤)</title>
 <style>
-  :root {
-    box-sizing: border-box;
-    --paper: #FBF3EA;
-    --paper-2: #F1E2D2;
-    --paper-3: #EAD8C4;
-    --ink: #3B2A20;
-    --ink-soft: #6b5342;
-    --wine: #7C2D3B;
-    --blush: #F1C7CF;
-    --gold: #B08340;
-    --seal: #8C2B34;
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --paper: #241a15;
-      --paper-2: #2c211a;
-      --paper-3: #382a20;
-      --ink: #f1e4d6;
-      --ink-soft: #cbb8a5;
-      --wine: #e6a3ac;
-      --blush: #5c3a3f;
-      --gold: #d8b26e;
-      --seal: #b5535c;
-    }
-  }
-
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  
-  body {
+  * {
     margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  body::before {
-    content: "";
-    position: fixed; inset: 0;
-    background-image:
-      radial-gradient(circle at 20% 15%, rgba(124,45,59,0.05), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(176,131,64,0.06), transparent 45%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ---------- Escena 1: Sobre ---------- */
-  #scene-envelope {
-    position: relative;
+  body {
+    background-color: #0d0814;
+    color: #f7e8ed;
+    font-family: 'Courier New', Courier, monospace;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(18px, 4vw, 32px);
-    padding: 24px 20px;
-    transition: opacity 0.6s ease, transform 0.6s ease;
-    z-index: 2;
-  }
-
-  #scene-envelope.hidden {
-    opacity: 0;
-    transform: scale(0.95);
-    pointer-events: none;
-    display: none !important;
-  }
-
-  .to-label {
-    font-family: 'Caveat', cursive;
-    font-size: clamp(32px, 7vw, 44px);
-    color: var(--wine);
-    letter-spacing: .5px;
-  }
-
-  .envelope-wrap {
-    --w: min(82vw, 320px);
-    width: var(--w);
-    aspect-ratio: 3/2;
-    position: relative;
-    cursor: pointer;
-    perspective: 1000px; /* Corrección 3D */
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .envelope-wrap:focus-visible {
-    outline: 2px solid var(--wine);
-    outline-offset: 6px;
-    border-radius: 6px;
-  }
-
-  .envelope-body {
-    position: absolute; inset: 0;
-    background: var(--paper-2);
-    border: 1.5px solid var(--ink);
-    border-radius: 4px;
-    box-shadow: 0 14px 28px rgba(59,42,32,0.25);
     overflow: hidden;
-    transition: transform .25s ease;
+    touch-action: manipulation;
   }
 
-  .envelope-wrap:hover .envelope-body { transform: translateY(-3px); }
-
-  .envelope-body::after {
-    content: "";
-    position: absolute; inset: 0;
-    background:
-      linear-gradient(155deg, transparent 49.4%, var(--ink) 49.4%, var(--ink) 50.2%, transparent 50.6%),
-      linear-gradient(205deg, transparent 49.4%, var(--ink) 49.4%, var(--ink) 50.2%, transparent 50.6%);
-    background-size: 100% 62%, 100% 62%;
-    background-repeat: no-repeat;
-    background-position: left bottom, right bottom;
-    opacity: .45;
-  }
-
-  .letter-peek {
-    position: absolute;
-    left: 6%; right: 6%; bottom: 8%; top: 14%;
-    background: var(--paper);
-    border: 1.2px solid var(--ink);
-    border-radius: 2px;
-    transform: translateY(78%);
-    transition: transform .6s cubic-bezier(.2,.8,.25,1);
+  /* Fondo de estrellas/fórmulas sutiles */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
     z-index: 1;
+    pointer-events: none;
+    opacity: 0.3;
   }
 
-  .flap {
-    position: absolute; left: 0; right: 0; top: 0; height: 58%;
-    background: var(--paper-3);
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
-    border-bottom: 1.5px solid var(--ink);
-    transform-origin: top center;
-    transition: transform .6s ease;
-    z-index: 3;
-    backface-visibility: hidden;
-  }
-
-  .seal {
-    position: absolute; left: 50%; top: 46%;
-    width: clamp(40px, 10vw, 52px); aspect-ratio: 1;
-    transform: translate(-50%, -50%);
-    background: var(--seal);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,.3);
-    z-index: 4;
-    transition: opacity .3s ease, transform .3s ease;
-  }
-  .seal svg { width: 50%; height: 50%; }
-
-  /* Estado abierto */
-  .envelope-wrap.open .flap {
-    transform: rotateX(180deg);
-    z-index: 0;
-  }
-  .envelope-wrap.open .seal {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(.3);
-  }
-  .envelope-wrap.open .letter-peek {
-    transform: translateY(-20%);
-  }
-
-  .open-hint {
-    font-size: clamp(14px, 3.5vw, 16px);
-    color: var(--ink-soft);
-    letter-spacing: .03em;
-  }
-
-  /* ---------- Escena 2: Carta ---------- */
-  #scene-letter {
+  /* Encabezado Matemático / Poético */
+  .header {
     position: relative;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-    opacity: 0;
-    display: none;
-    transition: opacity 0.8s ease;
-    z-index: 1;
+    z-index: 10;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+  }
+
+  .formula {
+    font-size: clamp(14px, 3.5vw, 18px);
+    color: #e28fa0;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    opacity: 0.85;
+  }
+
+  .subtext {
+    font-size: clamp(11px, 2.8vw, 13px);
+    color: #8a738c;
+    font-style: italic;
+  }
+
+  /* Lienzo principal donde se dibuja "ANA" con la función de corazón */
+  .canvas-container {
+    position: relative;
+    z-index: 10;
+    width: 100vw;
+    height: 55vh;
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #heart-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Pie de página interactivo */
+  .footer {
+    position: relative;
+    z-index: 10;
+    margin-top: 15px;
     text-align: center;
   }
 
-  #scene-letter.visible {
-    display: block;
-    opacity: 1;
-  }
-
-  .letter-head { margin-bottom: 16px; }
-  .script { font-family: 'Caveat', cursive; }
-  .letter-head .script { font-size: clamp(28px, 6vw, 36px); color: var(--wine); }
-
-  .beats {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(32px, 6vw, 48px);
-    margin: 36px 0;
-  }
-  .beat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  .beat:nth-child(even) .keepsake { transform: rotate(2deg); }
-  .beat:nth-child(odd) .keepsake { transform: rotate(-2deg); }
-
-  .keepsake {
-    width: min(75%, 260px);
-    background: var(--paper);
-    border: 1px solid var(--ink);
-    padding: 8px 8px 18px;
-    box-shadow: 0 12px 20px -10px rgba(59,42,32,0.3);
-    position: relative;
-  }
-  .keepsake img { display: block; width: 100%; height: auto; border-radius: 1px; }
-  .keepsake::after {
-    content: "";
-    position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-3deg);
-    width: 44px; height: 16px;
-    background: rgba(241,199,207,.7);
-    border: 1px solid rgba(59,42,32,.2);
-  }
-
-  .beat-cap {
-    font-size: clamp(20px, 4.5vw, 24px);
-    color: var(--ink-soft);
-  }
-
-  .headline {
-    font-style: italic;
-    font-size: clamp(28px, 6vw, 42px);
-    line-height: 1.3;
-    margin: 20px 0;
-  }
-  .wine { color: var(--wine); }
-
-  .flourish {
-    display: flex; align-items: center; gap: 14px;
-    margin: 30px 0;
-  }
-  .flourish::before, .flourish::after {
-    content: ""; flex: 1; height: 1px; background: var(--ink-soft); opacity: .3;
-  }
-  .flourish svg { width: 20px; height: 20px; fill: var(--wine); }
-
-  .closing .script { font-size: clamp(26px, 5vw, 32px); color: var(--wine); }
-  .closing .date { font-size: 14px; color: var(--ink-soft); display: block; margin-top: 6px; }
-
-  #hearts-layer {
-    position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden;
-  }
-  .heart-icon {
-    position: absolute; bottom: -40px;
-    width: 20px; height: 20px;
-    fill: var(--wine);
-    opacity: 0;
-    animation: rise 3.5s ease-in forwards;
-  }
-
-  @keyframes rise {
-    0% { opacity: 0; transform: translateY(0) scale(.6) rotate(0deg); }
-    15% { opacity: .8; }
-    100% { opacity: 0; transform: translateY(-105vh) scale(1.2) rotate(25deg); }
-  }
-
-  .forever-btn {
-    display: inline-block;
-    margin-top: 28px;
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 18px;
-    color: var(--wine);
-    background: transparent;
-    border: 1px solid var(--wine);
-    padding: 10px 28px;
-    border-radius: 30px;
+  .touch-hint {
+    font-size: 12px;
+    color: #e28fa0;
+    border: 1px solid rgba(226, 143, 160, 0.3);
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(226, 143, 160, 0.05);
+    animation: pulse 2s infinite;
     cursor: pointer;
-    transition: all .3s ease;
   }
-  .forever-btn:hover { background: var(--wine); color: var(--paper); transform: translateY(-2px); }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 15px rgba(226, 143, 160, 0.3); }
+  }
 </style>
 </head>
 <body>
 
-<div id="hearts-layer"></div>
+<canvas id="bg-canvas"></canvas>
 
-<section id="scene-envelope">
-  <span class="to-label">Para Ana</span>
-  <div class="envelope-wrap" id="envelope" role="button" tabindex="0" aria-label="Abrir la carta">
-    <div class="letter-peek"></div>
-    <div class="envelope-body"></div>
-    <div class="flap"></div>
-    <div class="seal">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 20s-7.5-4.6-10-9.3C0.4 7.6 2 4 5.4 4c2 0 3.4 1.1 4.1 2.3C10.2 5.1 11.6 4 13.6 4 17 4 18.6 7.6 17 10.7 15.5 15.4 12 20 12 20Z" fill="var(--paper)"/>
-      </svg>
-    </div>
-  </div>
-  <span class="open-hint">Toca el sobre para abrirlo</span>
-</section>
+<div class="header">
+  <div class="formula">f(x, y) = (x² + y² - 1)³ - x²y³ = 0</div>
+  <div class="subtext">Cada punto converge en la misma constante...</div>
+</div>
 
-<section id="scene-letter">
-  <div class="letter-head">
-    <span class="script">Para ti, Ana</span>
-  </div>
+<div class="canvas-container">
+  <canvas id="heart-canvas"></canvas>
+</div>
 
-  <div class="headline">
-    Cada momento a tu lado<br>
-    <span class="wine">se convierte en mi lugar favorito.</span>
-  </div>
-
-  <div class="flourish">
-    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-  </div>
-
-  <div class="beats">
-    <div class="beat">
-      <div class="keepsake">
-        <img src="data:image/jpeg;base64,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ffEcf8/144A3v++/vev2/P8Ae/4ve4/a97H1/X79/ffOvwz98d/+L38fn+/b8ePxfS+vf9+f1X5u9/5f1f9L0/N59+/53rf13/A9f/XmN8e+cfP7/vv/AAn/AD/1Xj3v5fA55d+/133x33x5f2fvdMf2v5v2fXv+L8fv5+vf8b6/D83p+/f2ffj8fzeff+d+/P8A4vX4e/D/APf/ALf/AFpje/veOf443vfGcevvffPvw39X38en/vf3xvv5/e5f+m9+/Hxfj14cePvevT8ff+/fHx9+/u+I/fH/AF+f139f4ve+ef2d+/X1/u3z+vx3z8/9/m/e6d+3XfH9X9+d/p83f3x2z8OP+X3x+fv+94A/P9ff/t5f1evXvv16+/p/wCP49v/AC+9+G/L13vf35+3j+/m8O//AN/H5+/3++P1vufS/f5/r14b/wAen3fM3vH5/rf1ev7/ANb1++/f5e8f+/x+Px/eP933vx8ffvHv9++f4/vfGvT39vf4ee+/vf5vb2fzeHf3x/eOvfvvjf3vufN76798e/f68fv8OnfG/vv2/L+98Pzf+95/b++/b8e3/d8Xp37+vf5ePfG/v29/Ecf4ve/vf43ffv/AIvX0+/ePf4b998fn8d/+Xv/AG8efx3vbf19/v3/ANeOce+sA4yN4cf7u+O/d48f74+P8AevT+/X/L/s+vfEevH445bf7+/wBgfN14312+fU8+Pf38ff/4v198e98ffE/X+Xv8ff4/e+v8+/e8ff8Ac+/19d/X3+L04f8AN/t8++PfOvg9979/+L19f/s/XvxeP5+/vjv5+33fE43vvjx8++u313+b1444d/j0/wCP+/vffOvg9/u5fX+bf6/t/D33zrv/AH+X/ffx4A58e/L3/wAv3+/eP/l+/P354/A+m/X+XwP83/Xv/wAv1+/83p338fTj/e+/4fxe/wAPf6ff8d8fn++/G9+38PxePfHx3v8A8/8Ad44/4vx/l/m+9+/H9e/63Xb3/b9uP++/E/e44yP1c9d8d9/7v9X8fT0/G+3x+v43x6/q5e+/a3x339ff03vffj09++OPm8e2+e+e3x3/AN71y38fT9f7vf47+vv06ce+fe++/i+Xp3/v38fn8N++/H1++/A3z7f1fn0837/9/v0x+3X5/X67f3743f1fjfv11x0/v398fj8Pse+u/m7/AN+/f16f1b+u+u/m4A987449v5vx74+Lp/bfy/N/73z5e+/a4+/37ffv4j9f3+/Xf17/ANXfX9/05cOOenp+X347/wBvh6+/v/t+/L05fufn+39fT9v9+3xfvv1/P/a/X8N+X/3774/f4enp9Pf++vj3++/r+98e/O9+/wC39ffu432/38eH/E9vfG/l435/38f0/P8Avvv8e+9vf3/9+/4/f8On79++Pjf9O+/283v8v0/X4fzf2fzevvff49+3xfd7383j4/zeG+3++e+/f1/2/P19Puf5vf4/x68PfX9vvz9fffO+PfEcf+L/AH7/AH/Pfvfj89/+Pvj3/f8AnA8f1b+30/m9f979vx9/3549ffwD+X5/2cevh8X58OHu4/Dve+/4e34e++ffw5enx+G+Pf5/4vf++P8A0/xf/e49fX4e+/ePqPvXvvjf/u8fv74+OP8AffG++ffx3/4/2f8Aw+vf++OPfv8Av1/v/u479/vfTj0988/5f38ePf4fzfH1+Pf8N+/v7++/d/H445e99d++Pvxf1f2A+vx/3/X3x/vf8f8AP+zX+X/P++9+Pxfw44x439vxf8X/AInp+u3vffH/AF+/m6evT/v8O+O448df7ff3743vf+vj/wCL1/v/AInu65+368efvfE+Xv5/Xl93X8vX19fv3+f139+248S/m+Pf9+f9+u/9vw/5sD4f/teN499fnx83/wC/1+/v+bfz+48v7+uP+fv+99/b6++/u+L5ev3c3v0/H9vff05/r8P3ev5Xv19e/GvLvfD039/h6dff38fjf9f4vTv+vL359vze+fT+e/69e++/vjj29+X09+/wAfvef3/wCDx4//AH7f2vvdfe5ffvj5/f1354/158N//v5vTv3+/f3/AABz5cfvevv+b7f2uvf/AL/y+/3/ABy/4v3fv3/t9vf657d+vrj4d/m8e3v0/Xj1x+f67/v+/wA/v/k4dfj37536evxf/wBvP7u/2vf33+16en39fze5/D354+/r8/j3x8f+/ePxfjfzcvffA131y3vfHfG9+3v8fn39c8v+J/1e9+/5/vfHv5+v7m/E9OfxffP39P349vf/AIvX8vf5vgNfUe/v741/u+L5/m55e98+/f1+bfm8dMff6fzfHw3+/v6f5vvevnx+35/b98+31++/Tvw/d9/6vfHv+/u9u++/x7/ffGv+X7Xp/vf3/d8Xp379+PfAHPvj0+/3/p/f+/y/ff339e3v35vD/b++/4e++P5/t8/f5ffH6539u/v33xv9v3/AA3/AN77+9v3eOP69+ePf++/vePf9ff/AGeO/X/35ev3+L+/ffH/ADef/E+/ffHv5fX069/rf37456d98fD354z0/ffPv+/e99+/3/v39/e9vfA7e+c+/fzePf8AvfH14fn++N/j+P5/e9/+58e+/f5vDvx453vfX/4+r/b/AIn449u59/v05477+f8AP+/9ffj9v37++/X31++/2+N8bf3+/fE+f33x+/4v99v1x5v4ef2ePf5f/ffPv3/G9vf988u/X/39739f/N49O/f4/X36d/372/u+OPx/m+Pv/e/A41/m/X9+N8O+Pf35fvdv9ff0/3++ePf3/H9f139++/v/d/3f/u+/vf3/wCf/b+7v++9/e/Tvvjfv9e+/veNfff1++/m+Pv6f379/e++Ovfvwx/m3477+/D447+/p9+/v3z139P9+v7m/vff/T4ffuX//EACcQAAICAAYCAgIDAQEAAAAAAAABESExQRBRYXGwgZGhsSDR8OHx/93aAAg2gA3A3B0w31A3fUDc/iA4+83NAnAnN9QfAn+oE531D1AtGfUDqBoX/0e4ITh31A2f/Q0XqD3BoE6A3NAndQNyA3UDp/yAvUDpAnUDpA3At38SgnAnN9QJwOToJw4A526A3dAnAtwnI13fEC/N3UBy3AnI1AnInAt+4E5vX4C+AnSAtwA53A3B03AtwN/qBuAnfEDe4CcCc31A3/AIAnD/yG4AnA1+4Ac79ANiA3UDcC39QfAHAX/A0XUDf4FqAnAnAv9AnD3BAnAnInL/yE/UDqBuAn4G93AnA1A3X5I/sCcCe4H8yHAnN9Qf3By99AnAnInNAnN9QJw5G9/EByx3Ac7gb33AnA13fUDpAnA3A5/sE9wNwI8E3fEC3A3X5InI3A3At/A3Atwf2AvyNyA3UDqB0gTInqBuBuBbgNwu04fEHTA6A3AnA4A4G4AtwE9/UDqByA39wJwLcBqANyAcvgDInO3AHO/QP13UDqAv9QdwI8E5fECcPQG/mInN/UDcC3AnAnO3Av9By4AnAnqBvfADl8gJwI8Dc3UDcC1AawOToDInAn+oE/p/6An9C3AD430E4E5fECcC/AnO/4C3ADcC1A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 InAnAt3fAnAAnJvIHJ1 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 InIEvgByORInADAn AnMDfxA3I39wOQH0C3A0AHAAt/sAnMDogByBwAtx3AuInMDfxJv/EHI1AHO3IEyAnInAnAD AnAv9wByJwAtwAIn4m/iA4AfmSInAtwJx8AcPQB/gCcAt/EDInADAnI/I43G3sByInA5G4EInADIn AnAvcAt3IDAtxInAHAnIE4/AInA/MDcbIDcgMD/sAnADfwA/cByAfAnIH4AnInIn/wACfUDqCeQPk31Av1An AnIHI1InAHA4InInADAnInIHInAHA4An4gnAnAvf/AGvUD In AnInATcgByORqJwA/X1B3cI1AHA0A3+4AvAv/ABI/iAJInIH4At2ByInA3InuAuRfyByByNwAtAtInIHsIn4gAtInMDv5gcnX/AFAnIHsAcv1BOAGv/wInIHAtwOQAf5At9QNyByInInAnAt/AAnIDcb/0AnI3AHOyBOByA5At/InInuAOQP2/I4AnAInIHf6A5f5E/EBOByByJIn/sByBy9ByOAnUDfgL4kb+An AnMDfyByNgAt39C3AtxORsBOJ3/IHAHAAtAnIDfyByByB82D7gnInuCcByA4AnAnADcgNwNyAf4An InJInAnA3/AByBOByJyNwByA5/kIn AnA0An MDcgMDf3AnqByNyAn4E4G52AAt/sCcPQH6A3uAuN3An31ADfxAtByNAn/IDfx/iBOAHMDcgMDcADcgByBvxByNwNwAHA/2C3+4HA4AHA0BOByNwtQN/IAnIEyBOAHAn AnAD InAInMDcgTgNwORuBOA/3Bbgf/2Q==" alt="Momento especial">
-      </div>
-      <span class="beat-cap">Donde todo comenzó</span>
-    </div>
-  </div>
-
-  <div class="closing">
-    <span class="script">Con todo mi amor,</span>
-    <span class="date">Para siempre</span>
-  </div>
-
-  <button class="forever-btn" onclick="celebrate()">Un detalle más</button>
-</section>
+<div class="footer">
+  <div class="touch-hint" id="interactive-btn">Toca la pantalla para alterar la ecuación</div>
+</div>
 
 <script>
-  const envelope = document.getElementById('envelope');
-  const sceneEnvelope = document.getElementById('scene-envelope');
-  const sceneLetter = document.getElementById('scene-letter');
-  const heartsLayer = document.getElementById('hearts-layer');
+  const canvas = document.getElementById('heart-canvas');
+  const ctx = canvas.getContext('2d');
+  const bgCanvas = document.getElementById('bg-canvas');
+  const bgCtx = bgCanvas.getContext('2d');
 
-  function openLetter() {
-    if (envelope.classList.contains('open')) return;
+  let width, height;
+  let heartParticles = [];
+  let burstParticles = [];
+
+  // Definición matricial de los trazos de la palabra "ANA" (en rejilla de puntos)
+  const nameGrid = [
+    // Letra A
+    {x: 0.15, y: 0.8}, {x: 0.18, y: 0.6}, {x: 0.21, y: 0.4}, {x: 0.24, y: 0.2}, 
+    {x: 0.27, y: 0.4}, {x: 0.30, y: 0.6}, {x: 0.33, y: 0.8},
+    {x: 0.19, y: 0.55}, {x: 0.24, y: 0.55}, {x: 0.29, y: 0.55},
+
+    // Letra N
+    {x: 0.43, y: 0.8}, {x: 0.43, y: 0.6}, {x: 0.43, y: 0.4}, {x: 0.43, y: 0.2},
+    {x: 0.47, y: 0.4}, {x: 0.51, y: 0.6}, {x: 0.55, y: 0.8},
+    {x: 0.55, y: 0.6}, {x: 0.55, y: 0.4}, {x: 0.55, y: 0.2},
+
+    // Letra A
+    {x: 0.65, y: 0.8}, {x: 0.68, y: 0.6}, {x: 0.71, y: 0.4}, {x: 0.74, y: 0.2}, 
+    {x: 0.77, y: 0.4}, {x: 0.80, y: 0.6}, {x: 0.83, y: 0.8},
+    {x: 0.69, y: 0.55}, {x: 0.74, y: 0.55}, {x: 0.79, y: 0.55}
+  ];
+
+  function resize() {
+    width = canvas.width = canvas.offsetWidth;
+    height = canvas.height = canvas.offsetHeight;
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+    initParticles();
+    drawBackground();
+  }
+
+  // Dibuja una mini silueta de corazón en coordenadas (x,y)
+  function drawHeartSymbol(context, x, y, size, color, alpha) {
+    context.save();
+    context.translate(x, y);
+    context.globalAlpha = alpha;
+    context.fillStyle = color;
+    context.beginPath();
+    context.moveTo(0, 0);
+    context.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size);
+    context.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0);
+    context.fill();
+    context.restore();
+  }
+
+  // Partículas que forman el nombre con vibración paramétrica de corazón
+  class HeartParticle {
+    constructor(baseX, baseY) {
+      this.baseX = baseX;
+      this.baseY = baseY;
+      this.size = Math.random() * 4 + 6;
+      this.angle = Math.random() * Math.PI * 2;
+      this.speed = Math.random() * 0.03 + 0.02;
+      this.amplitude = Math.random() * 6 + 3;
+      this.color = `hsl(${Math.random() * 20 + 340}, 80%, 65%)`;
+    }
+
+    update() {
+      this.angle += this.speed;
+      // Función cardioide de palpitación
+      const pulse = Math.sin(this.angle) * this.amplitude;
+      this.x = this.baseX + Math.cos(this.angle) * (pulse * 0.5);
+      this.y = this.baseY + Math.sin(this.angle) * (pulse * 0.5);
+    }
+
+    draw() {
+      drawHeartSymbol(ctx, this.x, this.y, this.size, this.color, 0.9);
+    }
+  }
+
+  // Partículas flotantes de explosión interactiva
+  class BurstParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      const angle = Math.random() * Math.PI * 2;
+      const force = Math.random() * 5 + 2;
+      this.vx = Math.cos(angle) * force;
+      this.vy = Math.sin(angle) * force;
+      this.size = Math.random() * 6 + 4;
+      this.alpha = 1;
+      this.color = `hsl(${Math.random() * 40 + 330}, 90%, 70%)`;
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += 0.05; // Gravedad suave
+      this.alpha -= 0.015;
+    }
+
+    draw() {
+      if (this.alpha > 0) {
+        drawHeartSymbol(ctx, this.x, this.y, this.size, this.color, this.alpha);
+      }
+    }
+  }
+
+  function initParticles() {
+    heartParticles = [];
     
-    envelope.classList.add('open');
+    // Generar partículas en densidad a lo largo de la rejilla de "ANA"
+    nameGrid.forEach(pt => {
+      const targetX = pt.x * width;
+      const targetY = pt.y * height;
 
-    // Esperar a que la solapa se abra antes de ocultar la escena
-    setTimeout(() => {
-      sceneEnvelope.classList.add('hidden');
-      sceneLetter.classList.add('visible');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      createHearts(12);
-    }, 900);
+      // Crear varios puntos por cada posición para rellenar
+      for (let i = 0; i < 5; i++) {
+        const offsetX = (Math.random() - 0.5) * 16;
+        const offsetY = (Math.random() - 0.5) * 16;
+        heartParticles.push(new HeartParticle(targetX + offsetX, targetY + offsetY));
+      }
+    });
   }
 
-  // Eventos de apertura
-  envelope.addEventListener('click', openLetter);
-  envelope.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    openLetter();
-  }, { passive: false });
+  function drawBackground() {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    bgCtx.fillStyle = '#4a2e40';
+    bgCtx.font = '12px Courier New';
 
-  envelope.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openLetter();
-    }
-  });
-
-  // Animación de Corazones
-  function createHearts(count) {
-    for (let i = 0; i < count; i++) {
-      setTimeout(() => {
-        const heart = document.createElement('div');
-        heart.className = 'heart-icon';
-        heart.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
-        
-        heart.style.left = Math.random() * 90 + 5 + 'vw';
-        heart.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
-        
-        heartsLayer.appendChild(heart);
-        
-        setTimeout(() => heart.remove(), 4000);
-      }, i * 150);
+    // Dibujar ecuaciones matemáticas aleatorias flotando tenue en el fondo
+    const mathSymbols = ['lim t→∞', '∫♥ dt', 'r = 1-sin(θ)', 'Ana', 'e^(iπ) + 1 = 0', 'x² + y² = ∞', '∇ × F = 0'];
+    for (let i = 0; i < 35; i++) {
+      const x = Math.random() * bgCanvas.width;
+      const y = Math.random() * bgCanvas.height;
+      const symbol = mathSymbols[Math.floor(Math.random() * mathSymbols.length)];
+      bgCtx.fillText(symbol, x, y);
     }
   }
 
-  function celebrate() {
-    createHearts(25);
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Actualizar y dibujar el nombre formado por corazones
+    heartParticles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+
+    // Actualizar explosiones al tocar
+    for (let i = burstParticles.length - 1; i >= 0; i--) {
+      const p = burstParticles[i];
+      p.update();
+      p.draw();
+      if (p.alpha <= 0) {
+        burstParticles.splice(i, 1);
+      }
+    }
+
+    requestAnimationFrame(animate);
   }
+
+  // Interacción al tocar/dar clic
+  function triggerBurst(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+    for (let i = 0; i < 20; i++) {
+      burstParticles.push(new BurstParticle(x, y));
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('click', triggerBurst);
+  window.addEventListener('touchstart', (e) => {
+    triggerBurst(e);
+  }, { passive: true });
+
+  // Inicialización
+  resize();
+  animate();
 </script>
 
 </body>
