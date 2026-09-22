@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>A = f(❤)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trazado Paramétrico: f(t) -> ANA</title>
 <style>
   * {
     margin: 0;
@@ -12,8 +12,8 @@
   }
 
   body {
-    background-color: #0d0814;
-    color: #f7e8ed;
+    background-color: #0a0e17;
+    color: #e0e6ed;
     font-family: 'Courier New', Courier, monospace;
     min-height: 100vh;
     display: flex;
@@ -21,278 +21,356 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    touch-action: manipulation;
   }
 
-  /* Fondo de estrellas/fórmulas sutiles */
-  #bg-canvas {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.3;
-  }
-
-  /* Encabezado Matemático / Poético */
-  .header {
-    position: relative;
+  .hud {
+    position: absolute;
+    top: 15px;
+    left: 15px;
     z-index: 10;
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 0 10px;
+    background: rgba(16, 22, 36, 0.85);
+    border: 1px solid #e91e63;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 0 15px rgba(233, 30, 99, 0.2);
+    font-size: clamp(11px, 2.5vw, 13px);
   }
 
-  .formula {
-    font-size: clamp(14px, 3.5vw, 18px);
-    color: #e28fa0;
-    letter-spacing: 2px;
+  .hud h1 {
+    font-size: 14px;
+    color: #e91e63;
     margin-bottom: 6px;
-    opacity: 0.85;
   }
 
-  .subtext {
-    font-size: clamp(11px, 2.8vw, 13px);
-    color: #8a738c;
-    font-style: italic;
+  .hud div {
+    margin: 3px 0;
+    color: #00f3ff;
   }
 
-  /* Lienzo principal donde se dibuja "ANA" con la función de corazón */
   .canvas-container {
-    position: relative;
-    z-index: 10;
     width: 100vw;
-    height: 55vh;
-    max-width: 600px;
+    height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
   }
 
-  #heart-canvas {
-    width: 100%;
-    height: 100%;
+  canvas {
+    background: #0d121d;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
   }
 
-  /* Pie de página interactivo */
-  .footer {
-    position: relative;
+  .controls {
+    position: absolute;
+    bottom: 20px;
     z-index: 10;
-    margin-top: 15px;
-    text-align: center;
+    display: flex;
+    gap: 12px;
   }
 
-  .touch-hint {
-    font-size: 12px;
-    color: #e28fa0;
-    border: 1px solid rgba(226, 143, 160, 0.3);
-    padding: 8px 18px;
+  button {
+    background: transparent;
+    color: #e91e63;
+    border: 1px solid #e91e63;
+    padding: 8px 16px;
     border-radius: 20px;
-    background: rgba(226, 143, 160, 0.05);
-    animation: pulse 2s infinite;
+    font-family: inherit;
+    font-weight: bold;
     cursor: pointer;
+    transition: all 0.3s ease;
   }
 
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 15px rgba(226, 143, 160, 0.3); }
+  button:hover {
+    background: #e91e63;
+    color: #fff;
+    box-shadow: 0 0 12px #e91e63;
   }
 </style>
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
-
-<div class="header">
-  <div class="formula">f(x, y) = (x² + y² - 1)³ - x²y³ = 0</div>
-  <div class="subtext">Cada punto converge en la misma constante...</div>
+<div class="hud">
+  <h1>PLANO CARTESIANO - GRAFICADOR PARAMÉTRICO</h1>
+  <div id="formula-display">f(t) = P(x(t), y(t))</div>
+  <div id="status-display">t = 0.00</div>
+  <div id="coord-display">X = 0.00 | Y = 0.00</div>
 </div>
 
 <div class="canvas-container">
-  <canvas id="heart-canvas"></canvas>
+  <canvas id="cartesianCanvas"></canvas>
 </div>
 
-<div class="footer">
-  <div class="touch-hint" id="interactive-btn">Toca la pantalla para alterar la ecuación</div>
+<div class="controls">
+  <button id="resetBtn">Reiniciar Trazado</button>
 </div>
 
 <script>
-  const canvas = document.getElementById('heart-canvas');
+  const canvas = document.getElementById('cartesianCanvas');
   const ctx = canvas.getContext('2d');
-  const bgCanvas = document.getElementById('bg-canvas');
-  const bgCtx = bgCanvas.getContext('2d');
+
+  const statusDisplay = document.getElementById('status-display');
+  const coordDisplay = document.getElementById('coord-display');
+  const formulaDisplay = document.getElementById('formula-display');
+  const resetBtn = document.getElementById('resetBtn');
 
   let width, height;
-  let heartParticles = [];
-  let burstParticles = [];
+  let originX, originY;
+  const scale = 25; // 1 unidad = 25 píxeles
 
-  // Definición matricial de los trazos de la palabra "ANA" (en rejilla de puntos)
-  const nameGrid = [
-    // Letra A
-    {x: 0.15, y: 0.8}, {x: 0.18, y: 0.6}, {x: 0.21, y: 0.4}, {x: 0.24, y: 0.2}, 
-    {x: 0.27, y: 0.4}, {x: 0.30, y: 0.6}, {x: 0.33, y: 0.8},
-    {x: 0.19, y: 0.55}, {x: 0.24, y: 0.55}, {x: 0.29, y: 0.55},
+  let t = 0;
+  let animId = null;
+  let currentSegmentIndex = 0;
+  let drawnPoints = [];
 
-    // Letra N
-    {x: 0.43, y: 0.8}, {x: 0.43, y: 0.6}, {x: 0.43, y: 0.4}, {x: 0.43, y: 0.2},
-    {x: 0.47, y: 0.4}, {x: 0.51, y: 0.6}, {x: 0.55, y: 0.8},
-    {x: 0.55, y: 0.6}, {x: 0.55, y: 0.4}, {x: 0.55, y: 0.2},
+  // Definición paramétrica de trazos en coordenadas cartesianas (X, Y)
+  // [A grande inicial/corazón, A, N, A]
+  const pathSegments = [];
 
-    // Letra A
-    {x: 0.65, y: 0.8}, {x: 0.68, y: 0.6}, {x: 0.71, y: 0.4}, {x: 0.74, y: 0.2}, 
-    {x: 0.77, y: 0.4}, {x: 0.80, y: 0.6}, {x: 0.83, y: 0.8},
-    {x: 0.69, y: 0.55}, {x: 0.74, y: 0.55}, {x: 0.79, y: 0.55}
-  ];
+  // Corazón central paramétrico: t de 0 a 2PI
+  function generateHeartPoints() {
+    const points = [];
+    const steps = 120;
+    for (let i = 0; i <= steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      // Función Paramétrica del corazón
+      const x = 0.6 * (16 * Math.pow(Math.sin(angle), 3)) / 2.5;
+      const y = 0.6 * (13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle)) / 2.5;
+      points.push({x, y});
+    }
+    return { name: "r(t) = Cardioide central", points };
+  }
+
+  // Trazados de las letras A, N, A
+  function generateTextPoints() {
+    const segments = [];
+
+    // --- Letra A1 ---
+    segments.push({
+      name: "A₁: x(t)=t, y(t)=2t+1",
+      points: interpolateLine(-7, -3, -5, 3, 20) // Pata izq
+    });
+    segments.push({
+      name: "A₁: x(t)=t, y(t)=-2t+1",
+      points: interpolateLine(-5, 3, -3, -3, 20) // Pata der
+    });
+    segments.push({
+      name: "A₁: y = 0.2",
+      points: interpolateLine(-6.1, 0.2, -3.9, 0.2, 15) // Travesaño
+    });
+
+    // --- Letra N ---
+    segments.push({
+      name: "N: Trazo vertical 1",
+      points: interpolateLine(-1.5, -3, -1.5, 3, 25)
+    });
+    segments.push({
+      name: "N: Trazo diagonal",
+      points: interpolateLine(-1.5, 3, 1.5, -3, 25)
+    });
+    segments.push({
+      name: "N: Trazo vertical 2",
+      points: interpolateLine(1.5, -3, 1.5, 3, 25)
+    });
+
+    // --- Letra A2 ---
+    segments.push({
+      name: "A₂: x(t)=t, y(t)=2t+1",
+      points: interpolateLine(3, -3, 5, 3, 20)
+    });
+    segments.push({
+      name: "A₂: x(t)=t, y(t)=-2t+1",
+      points: interpolateLine(5, 3, 7, -3, 20)
+    });
+    segments.push({
+      name: "A₂: y = 0.2",
+      points: interpolateLine(3.9, 0.2, 6.1, 0.2, 15)
+    });
+
+    return segments;
+  }
+
+  function interpolateLine(x1, y1, x2, y2, steps) {
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const alpha = i / steps;
+      pts.push({
+        x: x1 + (x2 - x1) * alpha,
+        y: y1 + (y2 - y1) * alpha
+      });
+    }
+    return pts;
+  }
+
+  function initPaths() {
+    pathSegments.length = 0;
+    pathSegments.push(generateHeartPoints());
+    const textSegs = generateTextPoints();
+    textSegs.forEach(s => pathSegments.push(s));
+  }
 
   function resize() {
-    width = canvas.width = canvas.offsetWidth;
-    height = canvas.height = canvas.offsetHeight;
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-    initParticles();
-    drawBackground();
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    originX = width / 2;
+    originY = height / 2;
+    drawGrid();
   }
 
-  // Dibuja una mini silueta de corazón en coordenadas (x,y)
-  function drawHeartSymbol(context, x, y, size, color, alpha) {
-    context.save();
-    context.translate(x, y);
-    context.globalAlpha = alpha;
-    context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(0, 0);
-    context.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size);
-    context.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0);
-    context.fill();
-    context.restore();
+  // Dibuja el Plano Cartesiano (Ejes, Cuadrícula y Números)
+  function drawGrid() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Líneas secundarias de cuadrícula
+    ctx.strokeStyle = '#162235';
+    ctx.lineWidth = 1;
+
+    for (let x = originX % scale; x < width; x += scale) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = originY % scale; y < height; y += scale) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    // Eje X y Eje Y principales
+    ctx.strokeStyle = '#00f3ff';
+    ctx.lineWidth = 2;
+
+    // Eje X
+    ctx.beginPath();
+    ctx.moveTo(0, originY);
+    ctx.lineTo(width, originY);
+    ctx.stroke();
+
+    // Eje Y
+    ctx.beginPath();
+    ctx.moveTo(originX, 0);
+    ctx.lineTo(originX, height);
+    ctx.stroke();
+
+    // Números y Marcas
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px Courier New';
+
+    // Etiqueta Ejes
+    ctx.fillText('X', width - 20, originY - 10);
+    ctx.fillText('Y', originX + 10, 20);
+
+    // Números en Eje X
+    for (let x = originX + scale; x < width; x += scale * 2) {
+      const val = Math.round((x - originX) / scale);
+      ctx.fillText(val, x - 5, originY + 15);
+    }
+    for (let x = originX - scale; x > 0; x -= scale * 2) {
+      const val = Math.round((x - originX) / scale);
+      ctx.fillText(val, x - 8, originY + 15);
+    }
+
+    // Números en Eje Y
+    for (let y = originY + scale; y < height; y += scale * 2) {
+      const val = Math.round((originY - y) / scale);
+      ctx.fillText(val, originX + 8, y + 4);
+    }
+    for (let y = originY - scale; y > 0; y -= scale * 2) {
+      const val = Math.round((originY - y) / scale);
+      ctx.fillText(val, originX + 8, y + 4);
+    }
   }
 
-  // Partículas que forman el nombre con vibración paramétrica de corazón
-  class HeartParticle {
-    constructor(baseX, baseY) {
-      this.baseX = baseX;
-      this.baseY = baseY;
-      this.size = Math.random() * 4 + 6;
-      this.angle = Math.random() * Math.PI * 2;
-      this.speed = Math.random() * 0.03 + 0.02;
-      this.amplitude = Math.random() * 6 + 3;
-      this.color = `hsl(${Math.random() * 20 + 340}, 80%, 65%)`;
-    }
-
-    update() {
-      this.angle += this.speed;
-      // Función cardioide de palpitación
-      const pulse = Math.sin(this.angle) * this.amplitude;
-      this.x = this.baseX + Math.cos(this.angle) * (pulse * 0.5);
-      this.y = this.baseY + Math.sin(this.angle) * (pulse * 0.5);
-    }
-
-    draw() {
-      drawHeartSymbol(ctx, this.x, this.y, this.size, this.color, 0.9);
-    }
+  // Convierte Coordenadas Matemáticas -> Píxeles en Pantalla
+  function toCanvasCoords(mathX, mathY) {
+    return {
+      x: originX + (mathX * scale),
+      y: originY - (mathY * scale) // El eje Y gráfico está invertido
+    };
   }
 
-  // Partículas flotantes de explosión interactiva
-  class BurstParticle {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      const angle = Math.random() * Math.PI * 2;
-      const force = Math.random() * 5 + 2;
-      this.vx = Math.cos(angle) * force;
-      this.vy = Math.sin(angle) * force;
-      this.size = Math.random() * 6 + 4;
-      this.alpha = 1;
-      this.color = `hsl(${Math.random() * 40 + 330}, 90%, 70%)`;
-    }
-
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += 0.05; // Gravedad suave
-      this.alpha -= 0.015;
-    }
-
-    draw() {
-      if (this.alpha > 0) {
-        drawHeartSymbol(ctx, this.x, this.y, this.size, this.color, this.alpha);
-      }
-    }
-  }
-
-  function initParticles() {
-    heartParticles = [];
-    
-    // Generar partículas en densidad a lo largo de la rejilla de "ANA"
-    nameGrid.forEach(pt => {
-      const targetX = pt.x * width;
-      const targetY = pt.y * height;
-
-      // Crear varios puntos por cada posición para rellenar
-      for (let i = 0; i < 5; i++) {
-        const offsetX = (Math.random() - 0.5) * 16;
-        const offsetY = (Math.random() - 0.5) * 16;
-        heartParticles.push(new HeartParticle(targetX + offsetX, targetY + offsetY));
-      }
-    });
-  }
-
-  function drawBackground() {
-    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-    bgCtx.fillStyle = '#4a2e40';
-    bgCtx.font = '12px Courier New';
-
-    // Dibujar ecuaciones matemáticas aleatorias flotando tenue en el fondo
-    const mathSymbols = ['lim t→∞', '∫♥ dt', 'r = 1-sin(θ)', 'Ana', 'e^(iπ) + 1 = 0', 'x² + y² = ∞', '∇ × F = 0'];
-    for (let i = 0; i < 35; i++) {
-      const x = Math.random() * bgCanvas.width;
-      const y = Math.random() * bgCanvas.height;
-      const symbol = mathSymbols[Math.floor(Math.random() * mathSymbols.length)];
-      bgCtx.fillText(symbol, x, y);
-    }
+  function startAnimation() {
+    if (animId) cancelAnimationFrame(animId);
+    t = 0;
+    currentSegmentIndex = 0;
+    drawnPoints = [];
+    initPaths();
+    animate();
   }
 
   function animate() {
-    ctx.clearRect(0, 0, width, height);
+    drawGrid();
 
-    // Actualizar y dibujar el nombre formado por corazones
-    heartParticles.forEach(p => {
-      p.update();
-      p.draw();
-    });
+    // Dibujar todos los puntos y líneas acumulados hasta el momento
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#e91e63';
+    ctx.shadowColor = '#e91e63';
+    ctx.shadowBlur = 10;
 
-    // Actualizar explosiones al tocar
-    for (let i = burstParticles.length - 1; i >= 0; i--) {
-      const p = burstParticles[i];
-      p.update();
-      p.draw();
-      if (p.alpha <= 0) {
-        burstParticles.splice(i, 1);
+    ctx.beginPath();
+    for (let i = 0; i < drawnPoints.length; i++) {
+      const pt = drawnPoints[i];
+      const screen = toCanvasCoords(pt.x, pt.y);
+      if (pt.isNewSegment) {
+        ctx.moveTo(screen.x, screen.y);
+      } else {
+        ctx.lineTo(screen.x, screen.y);
       }
     }
+    ctx.stroke();
+    ctx.shadowBlur = 0; // Reset sombra
 
-    requestAnimationFrame(animate);
-  }
+    // Procesar el trazo actual
+    if (currentSegmentIndex < pathSegments.length) {
+      const currentSeg = pathSegments[currentSegmentIndex];
+      const ptIndex = Math.floor(t);
 
-  // Interacción al tocar/dar clic
-  function triggerBurst(e) {
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+      if (ptIndex < currentSeg.points.length) {
+        const currentPt = currentSeg.points[ptIndex];
+        
+        drawnPoints.push({
+          x: currentPt.x,
+          y: currentPt.y,
+          isNewSegment: ptIndex === 0
+        });
 
-    for (let i = 0; i < 20; i++) {
-      burstParticles.push(new BurstParticle(x, y));
+        // Dibujar el punto del "Trazador" (Lápiz Láser)
+        const screenPt = toCanvasCoords(currentPt.x, currentPt.y);
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(screenPt.x, screenPt.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#00f3ff';
+        ctx.beginPath();
+        ctx.arc(screenPt.x, screenPt.y, 10, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Actualizar HUD con información matemática
+        formulaDisplay.innerText = currentSeg.name;
+        statusDisplay.innerText = `t = ${(t * 0.1).toFixed(2)}`;
+        coordDisplay.innerText = `X = ${currentPt.x.toFixed(2)} | Y = ${currentPt.y.toFixed(2)}`;
+
+        t += 0.8; // Velocidad de trazado
+      } else {
+        t = 0;
+        currentSegmentIndex++;
+      }
+      animId = requestAnimationFrame(animate);
+    } else {
+      // Animación finalizada
+      formulaDisplay.innerText = "f(t) ➔ ANA completado";
+      statusDisplay.innerText = "Trazado Finalizado";
     }
   }
 
   window.addEventListener('resize', resize);
-  window.addEventListener('click', triggerBurst);
-  window.addEventListener('touchstart', (e) => {
-    triggerBurst(e);
-  }, { passive: true });
+  resetBtn.addEventListener('click', startAnimation);
 
-  // Inicialización
+  // Inicio
   resize();
-  animate();
+  startAnimation();
 </script>
 
 </body>
