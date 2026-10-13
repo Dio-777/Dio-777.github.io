@@ -1,377 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trazado Paramétrico: f(t) -> ANA</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>No todo es trabajo — Invitación a comer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    background-color: #0a0e17;
-    color: #e0e6ed;
-    font-family: 'Courier New', Courier, monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  .hud {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    z-index: 10;
-    background: rgba(16, 22, 36, 0.85);
-    border: 1px solid #e91e63;
-    border-radius: 8px;
-    padding: 12px 16px;
-    box-shadow: 0 0 15px rgba(233, 30, 99, 0.2);
-    font-size: clamp(11px, 2.5vw, 13px);
-  }
-
-  .hud h1 {
-    font-size: 14px;
-    color: #e91e63;
-    margin-bottom: 6px;
-  }
-
-  .hud div {
-    margin: 3px 0;
-    color: #00f3ff;
-  }
-
-  .canvas-container {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  canvas {
-    background: #0d121d;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
-  }
-
-  .controls {
-    position: absolute;
-    bottom: 20px;
-    z-index: 10;
-    display: flex;
-    gap: 12px;
-  }
-
-  button {
-    background: transparent;
-    color: #e91e63;
-    border: 1px solid #e91e63;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-family: inherit;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  button:hover {
-    background: #e91e63;
-    color: #fff;
-    box-shadow: 0 0 12px #e91e63;
-  }
+:root{--bg:#EEF1EA;--ink:#12312B;--gold:#8A6720;--line:#12312B33;--soft:#E1E7DC;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11302B;--ink:#EEF1EA;--gold:#D4AE5A;--line:#EEF1EA33;--soft:#17403A}}
+:root[data-theme="dark"]{--bg:#11302B;--ink:#EEF1EA;--gold:#D4AE5A;--line:#EEF1EA33;--soft:#17403A}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif;line-height:1.65}
+section{max-width:600px;margin:0 auto;padding:72px 24px;text-align:center}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:40px;padding-bottom:40px}
+.plate{width:min(86vw,430px);aspect-ratio:1;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;padding:9px}
+.plate-in{width:100%;height:100%;border-radius:50%;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 12%;animation:rise 1.2s ease both}
+h1,h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;margin:0}
+h1{font-size:clamp(2.6rem,10vw,4rem);line-height:1.02}
+h2{font-size:clamp(1.9rem,6vw,2.5rem);line-height:1.1;margin-bottom:20px}
+.sub{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:1.25rem;color:var(--gold);margin:14px 0 0}
+.hint{margin-top:36px;font-size:.9rem;opacity:.7}
+p{margin:0 auto 16px;max-width:46ch}
+.count{background:var(--soft)}
+.big{font-family:"Instrument Serif",Georgia,serif;font-size:clamp(5rem,26vw,8rem);line-height:1;color:var(--gold)}
+.count p{margin-top:8px}
+dl{margin:28px auto 0;max-width:380px;border-top:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);text-align:left}
+dt{color:var(--gold);font-weight:500}
+dd{margin:0;text-align:right}
+.menu{display:grid;gap:28px;margin-top:32px}
+.menu div{padding-bottom:28px;border-bottom:1px solid var(--line)}
+.menu div:last-child{border:0;padding-bottom:0}
+.menu h3{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-style:italic;font-size:1.6rem;margin:0 0 6px}
+.menu p{margin:0 auto}
+.rules{background:var(--soft)}
+.rules ul{list-style:none;margin:28px auto 0;padding:0;max-width:420px;text-align:left}
+.rules li{padding:14px 0 14px 34px;position:relative;border-bottom:1px solid var(--line)}
+.rules li::before{content:"";position:absolute;left:4px;top:23px;width:12px;height:12px;border-radius:50%;border:1px solid var(--gold)}
+.quote{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:clamp(1.6rem,5.5vw,2.2rem);line-height:1.25;max-width:22ch;margin:0 auto}
+.end{padding-top:24px;padding-bottom:96px}
+.end .plate{width:120px;padding:5px;margin:0 auto 20px}
+.end .plate-in{padding:0;animation:none}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.plate-in{animation:none}}
 </style>
 </head>
 <body>
 
-<div class="hud">
-  <h1>PLANO CARTESIANO - GRAFICADOR PARAMÉTRICO</h1>
-  <div id="formula-display">f(t) = P(x(t), y(t))</div>
-  <div id="status-display">t = 0.00</div>
-  <div id="coord-display">X = 0.00 | Y = 0.00</div>
-</div>
+<section class="hero">
+  <div class="plate"><div class="plate-in">
+    <h1>No todo es trabajo</h1>
+    <p class="sub">Vamos a comer</p>
+  </div></div>
+  <p class="hint">Sigue bajando, hay más</p>
+</section>
 
-<div class="canvas-container">
-  <canvas id="cartesianCanvas"></canvas>
-</div>
+<section>
+  <p>Ya estuvo bueno de juntas y correos. Vamos a comer rico y a platicar de lo que sea, menos de chamba.</p>
+  <p>Llevamos meses con puro pendiente. Esta vez lo único que hay que resolver es qué pedimos de postre.</p>
+</section>
 
-<div class="controls">
-  <button id="resetBtn">Reiniciar Trazado</button>
-</div>
+<section class="count">
+  <div class="big" id="dias">–</div>
+  <p id="txt">días para la comida</p>
+  <dl>
+    <div class="row"><dt>Día</dt><dd>Jueves 22 de octubre</dd></div>
+    <div class="row"><dt>Hora</dt><dd>2:00 pm</dd></div>
+    <div class="row"><dt>Lugar</dt><dd>[Nombre del restaurante]</dd></div>
+    <div class="row"><dt>Vestimenta</dt><dd>Como andes, cómodo</dd></div>
+  </dl>
+</section>
+
+<section>
+  <h2>Qué va a haber</h2>
+  <div class="menu">
+    <div><h3>Comida rica</h3><p>Sin prisas y sin andar viendo el reloj.</p></div>
+    <div><h3>Puro chisme sano</h3><p>De viajes, de series, de lo que sea menos de la oficina.</p></div>
+    <div><h3>Buena compañía</h3><p>Que al final es lo mejor de todo.</p></div>
+  </div>
+</section>
+
+<section class="rules">
+  <h2>Reglas de la mesa (en serio)</h2>
+  <ul>
+    <li>Prohibido decir "ya que estamos, un pendientito".</li>
+    <li>Celulares boca abajo (las fotos de la comida sí valen).</li>
+    <li>El postre se pide para todos, sin discusión.</li>
+    <li>El que más se ría escoge el lugar de la próxima.</li>
+  </ul>
+</section>
+
+<section>
+  <p class="quote">Se chambea mejor con quien también se come a gusto.</p>
+</section>
+
+<section class="end">
+  <div class="plate"><div class="plate-in"></div></div>
+  <p>Te espero con hambre.</p>
+</section>
 
 <script>
-  const canvas = document.getElementById('cartesianCanvas');
-  const ctx = canvas.getContext('2d');
-
-  const statusDisplay = document.getElementById('status-display');
-  const coordDisplay = document.getElementById('coord-display');
-  const formulaDisplay = document.getElementById('formula-display');
-  const resetBtn = document.getElementById('resetBtn');
-
-  let width, height;
-  let originX, originY;
-  const scale = 25; // 1 unidad = 25 píxeles
-
-  let t = 0;
-  let animId = null;
-  let currentSegmentIndex = 0;
-  let drawnPoints = [];
-
-  // Definición paramétrica de trazos en coordenadas cartesianas (X, Y)
-  // [A grande inicial/corazón, A, N, A]
-  const pathSegments = [];
-
-  // Corazón central paramétrico: t de 0 a 2PI
-  function generateHeartPoints() {
-    const points = [];
-    const steps = 120;
-    for (let i = 0; i <= steps; i++) {
-      const angle = (i / steps) * Math.PI * 2;
-      // Función Paramétrica del corazón
-      const x = 0.6 * (16 * Math.pow(Math.sin(angle), 3)) / 2.5;
-      const y = 0.6 * (13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle)) / 2.5;
-      points.push({x, y});
-    }
-    return { name: "r(t) = Cardioide central", points };
-  }
-
-  // Trazados de las letras A, N, A
-  function generateTextPoints() {
-    const segments = [];
-
-    // --- Letra A1 ---
-    segments.push({
-      name: "A₁: x(t)=t, y(t)=2t+1",
-      points: interpolateLine(-7, -3, -5, 3, 20) // Pata izq
-    });
-    segments.push({
-      name: "A₁: x(t)=t, y(t)=-2t+1",
-      points: interpolateLine(-5, 3, -3, -3, 20) // Pata der
-    });
-    segments.push({
-      name: "A₁: y = 0.2",
-      points: interpolateLine(-6.1, 0.2, -3.9, 0.2, 15) // Travesaño
-    });
-
-    // --- Letra N ---
-    segments.push({
-      name: "N: Trazo vertical 1",
-      points: interpolateLine(-1.5, -3, -1.5, 3, 25)
-    });
-    segments.push({
-      name: "N: Trazo diagonal",
-      points: interpolateLine(-1.5, 3, 1.5, -3, 25)
-    });
-    segments.push({
-      name: "N: Trazo vertical 2",
-      points: interpolateLine(1.5, -3, 1.5, 3, 25)
-    });
-
-    // --- Letra A2 ---
-    segments.push({
-      name: "A₂: x(t)=t, y(t)=2t+1",
-      points: interpolateLine(3, -3, 5, 3, 20)
-    });
-    segments.push({
-      name: "A₂: x(t)=t, y(t)=-2t+1",
-      points: interpolateLine(5, 3, 7, -3, 20)
-    });
-    segments.push({
-      name: "A₂: y = 0.2",
-      points: interpolateLine(3.9, 0.2, 6.1, 0.2, 15)
-    });
-
-    return segments;
-  }
-
-  function interpolateLine(x1, y1, x2, y2, steps) {
-    const pts = [];
-    for (let i = 0; i <= steps; i++) {
-      const alpha = i / steps;
-      pts.push({
-        x: x1 + (x2 - x1) * alpha,
-        y: y1 + (y2 - y1) * alpha
-      });
-    }
-    return pts;
-  }
-
-  function initPaths() {
-    pathSegments.length = 0;
-    pathSegments.push(generateHeartPoints());
-    const textSegs = generateTextPoints();
-    textSegs.forEach(s => pathSegments.push(s));
-  }
-
-  function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    originX = width / 2;
-    originY = height / 2;
-    drawGrid();
-  }
-
-  // Dibuja el Plano Cartesiano (Ejes, Cuadrícula y Números)
-  function drawGrid() {
-    ctx.clearRect(0, 0, width, height);
-
-    // Líneas secundarias de cuadrícula
-    ctx.strokeStyle = '#162235';
-    ctx.lineWidth = 1;
-
-    for (let x = originX % scale; x < width; x += scale) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-    for (let y = originY % scale; y < height; y += scale) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    // Eje X y Eje Y principales
-    ctx.strokeStyle = '#00f3ff';
-    ctx.lineWidth = 2;
-
-    // Eje X
-    ctx.beginPath();
-    ctx.moveTo(0, originY);
-    ctx.lineTo(width, originY);
-    ctx.stroke();
-
-    // Eje Y
-    ctx.beginPath();
-    ctx.moveTo(originX, 0);
-    ctx.lineTo(originX, height);
-    ctx.stroke();
-
-    // Números y Marcas
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px Courier New';
-
-    // Etiqueta Ejes
-    ctx.fillText('X', width - 20, originY - 10);
-    ctx.fillText('Y', originX + 10, 20);
-
-    // Números en Eje X
-    for (let x = originX + scale; x < width; x += scale * 2) {
-      const val = Math.round((x - originX) / scale);
-      ctx.fillText(val, x - 5, originY + 15);
-    }
-    for (let x = originX - scale; x > 0; x -= scale * 2) {
-      const val = Math.round((x - originX) / scale);
-      ctx.fillText(val, x - 8, originY + 15);
-    }
-
-    // Números en Eje Y
-    for (let y = originY + scale; y < height; y += scale * 2) {
-      const val = Math.round((originY - y) / scale);
-      ctx.fillText(val, originX + 8, y + 4);
-    }
-    for (let y = originY - scale; y > 0; y -= scale * 2) {
-      const val = Math.round((originY - y) / scale);
-      ctx.fillText(val, originX + 8, y + 4);
-    }
-  }
-
-  // Convierte Coordenadas Matemáticas -> Píxeles en Pantalla
-  function toCanvasCoords(mathX, mathY) {
-    return {
-      x: originX + (mathX * scale),
-      y: originY - (mathY * scale) // El eje Y gráfico está invertido
-    };
-  }
-
-  function startAnimation() {
-    if (animId) cancelAnimationFrame(animId);
-    t = 0;
-    currentSegmentIndex = 0;
-    drawnPoints = [];
-    initPaths();
-    animate();
-  }
-
-  function animate() {
-    drawGrid();
-
-    // Dibujar todos los puntos y líneas acumulados hasta el momento
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#e91e63';
-    ctx.shadowColor = '#e91e63';
-    ctx.shadowBlur = 10;
-
-    ctx.beginPath();
-    for (let i = 0; i < drawnPoints.length; i++) {
-      const pt = drawnPoints[i];
-      const screen = toCanvasCoords(pt.x, pt.y);
-      if (pt.isNewSegment) {
-        ctx.moveTo(screen.x, screen.y);
-      } else {
-        ctx.lineTo(screen.x, screen.y);
-      }
-    }
-    ctx.stroke();
-    ctx.shadowBlur = 0; // Reset sombra
-
-    // Procesar el trazo actual
-    if (currentSegmentIndex < pathSegments.length) {
-      const currentSeg = pathSegments[currentSegmentIndex];
-      const ptIndex = Math.floor(t);
-
-      if (ptIndex < currentSeg.points.length) {
-        const currentPt = currentSeg.points[ptIndex];
-        
-        drawnPoints.push({
-          x: currentPt.x,
-          y: currentPt.y,
-          isNewSegment: ptIndex === 0
-        });
-
-        // Dibujar el punto del "Trazador" (Lápiz Láser)
-        const screenPt = toCanvasCoords(currentPt.x, currentPt.y);
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(screenPt.x, screenPt.y, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#00f3ff';
-        ctx.beginPath();
-        ctx.arc(screenPt.x, screenPt.y, 10, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Actualizar HUD con información matemática
-        formulaDisplay.innerText = currentSeg.name;
-        statusDisplay.innerText = `t = ${(t * 0.1).toFixed(2)}`;
-        coordDisplay.innerText = `X = ${currentPt.x.toFixed(2)} | Y = ${currentPt.y.toFixed(2)}`;
-
-        t += 0.8; // Velocidad de trazado
-      } else {
-        t = 0;
-        currentSegmentIndex++;
-      }
-      animId = requestAnimationFrame(animate);
-    } else {
-      // Animación finalizada
-      formulaDisplay.innerText = "f(t) ➔ ANA completado";
-      statusDisplay.innerText = "Trazado Finalizado";
-    }
-  }
-
-  window.addEventListener('resize', resize);
-  resetBtn.addEventListener('click', startAnimation);
-
-  // Inicio
-  resize();
-  startAnimation();
+(function(){
+  var now=new Date(),y=now.getFullYear();
+  var target=new Date(y,9,22,14,0,0);
+  var d=Math.ceil((target-now)/86400000);
+  var big=document.getElementById('dias'),txt=document.getElementById('txt');
+  if(d>1){big.textContent=d;txt.textContent='días para la comida';}
+  else if(d===1){big.textContent='1';txt.textContent='día para la comida';}
+  else if(d===0){big.textContent='Hoy';txt.textContent='es la comida';}
+  else{big.textContent='Gracias';txt.textContent='por venir, estuvo buenísimo';}
+})();
 </script>
-
 </body>
 </html>
